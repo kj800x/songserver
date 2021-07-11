@@ -1,11 +1,22 @@
+import fs from "fs";
 import path from "path";
 import process from "process";
-import mkdirp from "mkdirp";
+import chalk from "chalk";
 
 const { env } = process;
 
-const DEFAULT_DATA_DIR = "../data";
+if (!env.DATA_DIR && env.BASE_DATA_DIR && !fs.existsSync(env.BASE_DATA_DIR)) {
+  console.log(
+    `⚠️  ${chalk.yellow(
+      "warn:"
+    )} BASE_DATA_DIR is set but does not exist. Falling back to default DATA_DIR.`
+  );
+}
 
-export const DATA_DIR = path.resolve(env.DATA_DIR || DEFAULT_DATA_DIR);
-
-mkdirp.sync(DATA_DIR);
+export const DATA_DIR = path.resolve(
+  env.DATA_DIR ||
+    (fs.existsSync(env.BASE_DATA_DIR)
+      ? path.join(env.BASE_DATA_DIR, "songserver")
+      : false) ||
+    path.join(__dirname, "..", "..", "..", "data")
+);
